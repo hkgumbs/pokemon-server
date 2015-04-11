@@ -15,19 +15,7 @@ console.log("websocket server created")
 
 var Battler = require('./battler');
 var battler = new Battler();
-console.log('battler: ' + battler);
 
-wss.on('connection', function(ws) {
-    battler.new_user(ws);
-    console.log('connected');
-});
-
-wss.on('message', function(data, ws) {
-    battler.move(data, ws);
-    console.log('message: ' + data);
-});
-
-wss.on('closedconnection', function(ws) {
-    battler.quit(ws);
-    console.log('quit');
-});
+wss.on('connection', battler.connect);
+wss.on('message', battler.message);
+wss.on('closedconnection', battler.close);

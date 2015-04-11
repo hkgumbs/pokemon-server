@@ -2,26 +2,25 @@ function Battler() {
     this.waiting = null;
     this.opponents = {};
 
-    this.new_user = function(socket) {
+    this.connect = function(socket) {
         if (this.waiting == null) {
             this.waiting = socket;
-            console.log('waiting');
         } else {
             this.opponents[this.waiting] = socket;
             this.opponents[socket] = this.waiting;
 
-            socket.send('"Ready"');
-            this.waiting.send('"Begin"');
+            this.waiting.send('{phase:"handshake",turn:true}');
+            socket.send('{phase:"handshake",turn:false}');
 
             this.waiting = null;
         }
     }
 
-    this.move = function(data, socket) {
+    this.message = function(data, socket) {
         this.opponents[socket].send(data);
     }
 
-    this.quit = function(socket) {
+    this.close = function(socket) {
         if (socket in this.opponents) {
             opponent = this.opponents[socket];
             delete this.opponents[socket];
