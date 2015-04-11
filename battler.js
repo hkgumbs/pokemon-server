@@ -31,6 +31,8 @@ function Battler() {
             delete self.opponents[opponent];
             opponent.close();
         }
+        if (socket == self.waiting)
+            self.waiting = null;
     }
 }
 
