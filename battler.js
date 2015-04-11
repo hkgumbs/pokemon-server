@@ -4,6 +4,7 @@ function Battler() {
     self.opponents = {};
 
     self.connect = function(socket) {
+        console.log("connected");
         if (self.waiting == null) {
             self.waiting = socket;
         } else {
@@ -18,10 +19,12 @@ function Battler() {
     }
 
     self.message = function(data, socket) {
+        console.log("message", data);
         self.opponents[socket].send(data);
     }
 
     self.close = function(socket) {
+        console.log("closed");
         if (socket in self.opponents) {
             opponent = self.opponents[socket];
             delete self.opponents[socket];
