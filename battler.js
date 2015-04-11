@@ -5,12 +5,13 @@ function Battler() {
     this.new_user = function(socket) {
         if (this.waiting == null) {
             this.waiting = socket;
+            console.log('waiting');
         } else {
             this.opponents[this.waiting] = socket;
             this.opponents[socket] = this.waiting;
 
-            socket.send("Ready");
-            this.waiting.send("Begin");
+            socket.send('"Ready"');
+            this.waiting.send('"Begin"');
 
             this.waiting = null;
         }
@@ -25,6 +26,7 @@ function Battler() {
             opponent = this.opponents[socket];
             delete this.opponents[socket];
             delete this.opponents[opponent];
+            opponent.close();
         }
     }
 }
