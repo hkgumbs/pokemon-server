@@ -1,42 +1,28 @@
-var Hapi = require('hapi');
-var Ws = require('ws');
+var WebSocketServer = require("ws").Server
+var http = require("http")
+var express = require("express")
+var app = express()
+var port = process.env.PORT || 5000
 
-var webSockets = [];
-var server = new Hapi.Server(8000);
+app.use(express.static(__dirname + "/"))
 
-server.start(function () {
+var server = http.createServer(app)
+server.listen(port)
 
-    var ws = new Ws.Server({ server: server.listener });
-    ws.on('connection', function (socket) {
+console.log("http server listening on %d", port)
 
-        socket.send('Welcome');
-    });
+var wss = new WebSocketServer({server: server})
+console.log("websocket server created")
 
-    webSockets.push(ws);
-});
+wss.on("connection", function(ws) {
+  var id = setInterval(function() {
+    ws.send(JSON.stringify(new Date()), function() {  })
+  }, 1000)
 
+  console.log("websocket connection open")
 
-process.stdin.on('data', function (data) {
-
-    transmit(data)
-});
-
-var transmit = function (data) {
-
-    try {
-        webSockets.forEach(function (ws) {
-
-            if (!ws || !ws.clients) {
-                return;
-            }
-
-            for (var i = 0, il = ws.clients.length; i < il; ++i) {
-                var client = ws.clients[i];
-                if (client && client.send) {
-                    client.send(data.toString());
-                }
-            }
-        });
-    }
-    catch (err) {}
-};
+  ws.on("close", function() {
+    console.log("websocket connection close")
+    clearInterval(id)
+  })
+})
