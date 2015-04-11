@@ -5,11 +5,13 @@ function Battler() {
 
     self.connect = function(socket) {
         console.log("connected");
-        if (self.waiting == null) {
+        if (self.waiting == null ||
+                self.waiting.readyState != self.waiting.OPEN) {
             self.waiting = socket;
         } else {
             self.opponents[self.waiting] = socket;
             self.opponents[socket] = self.waiting;
+
 
             self.waiting.send('{phase:"handshake",turn:true}');
             socket.send('{phase:"handshake",turn:false}');
