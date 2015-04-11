@@ -1,30 +1,31 @@
 function Battler() {
-    this.waiting = null;
-    this.opponents = {};
+    var self = this;
+    self.waiting = null;
+    self.opponents = {};
 
-    this.connect = function(socket) {
-        if (this.waiting == null) {
-            this.waiting = socket;
+    self.connect = function(socket) {
+        if (self.waiting == null) {
+            self.waiting = socket;
         } else {
-            this.opponents[this.waiting] = socket;
-            this.opponents[socket] = this.waiting;
+            self.opponents[self.waiting] = socket;
+            self.opponents[socket] = self.waiting;
 
-            this.waiting.send('{phase:"handshake",turn:true}');
+            self.waiting.send('{phase:"handshake",turn:true}');
             socket.send('{phase:"handshake",turn:false}');
 
-            this.waiting = null;
+            self.waiting = null;
         }
     }
 
-    this.message = function(data, socket) {
-        this.opponents[socket].send(data);
+    self.message = function(data, socket) {
+        self.opponents[socket].send(data);
     }
 
-    this.close = function(socket) {
-        if (socket in this.opponents) {
-            opponent = this.opponents[socket];
-            delete this.opponents[socket];
-            delete this.opponents[opponent];
+    self.close = function(socket) {
+        if (socket in self.opponents) {
+            opponent = self.opponents[socket];
+            delete self.opponents[socket];
+            delete self.opponents[opponent];
             opponent.close();
         }
     }
