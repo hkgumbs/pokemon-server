@@ -1,33 +1,33 @@
 var server = require('http').createServer();
-var io = require('socket.io')(server);
+var WebSocketServer = require('ws').Server,
+        wss = new WebSocketServer({port : 8080});
 
 var buffer = null;
 
-io.on('connection', function(socket) {
-    if (buffer == null || buffer.disconnected) {
+wss.on('connection', function(socket) {
+    if (buffer == null) {  // || buffer.disconnected) {
         buffer = socket;
         console.log("waiting");
     } else {
-
         // each socket should listen on its own id
-        buffer.on(buffer.id, function(data){
-            socket.emit('message', data);
+        buffer.on('message', function(data){
+            socket.send(data);
         });
-        socket.on(socket.id, function(data){
-            buffer.emit('message', data);
+        socket.on('message', function(data){
+            buffer.send(data);
         });
 
         // initiate handshake
-        buffer.emit('message', {
-            id : buffer.id,
+        buffer.send(JSON.stringify({
+            // id : buffer.id,
             phase : 'handshake',
             first : true
-        });
-        socket.emit('message', {
-            id : socket.id,
+        }));
+        socket.send(JSON.stringify({
+            // id : socket.id,
             phase : 'handshake',
             first : false
-        });
+        }));
 
         console.log('connected');
         buffer = null;
@@ -40,5 +40,3 @@ io.on('connection', function(socket) {
     //     socket.emit('message', {val : data.val + 1});
     // });
 });
-
-server.listen(3000);
