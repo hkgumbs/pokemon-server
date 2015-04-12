@@ -1,30 +1,43 @@
 var server = require('http').createServer();
 var WebSocketServer = require('ws').Server,
-        wss = new WebSocketServer({port : 8080});
+        wss = new WebSocketServer({port : 3000});
 
 var buffer = null;
+var table = {};
 
 wss.on('connection', function(socket) {
     if (buffer == null) {  // || buffer.disconnected) {
         buffer = socket;
         console.log("waiting");
     } else {
-        // each socket should listen on its own id
-        buffer.on('message', function(data){
-            socket.send(data);
-        });
-        socket.on('message', function(data){
-            buffer.send(data);
-        });
+        table[buffer.id] = socket;
+        table[socket.id] = buffer;
+
+        // translate messages to your opponent
+        var onmessage = function(data) {
+            table[this.id].send(data);
+        }
+        buffer.on('message', onmessage);
+        socket.on('message', onmessage);
+
+        // close connections on exit
+        var onclose = function(data) {
+            try {
+                table[this.id].close();
+            } catch (err) {}
+            try {
+                delete table[this.id];
+            } catch (err) {}
+        }
+        buffer.on('close', onclose);
+        socket.on('close', onclose);
 
         // initiate handshake
         buffer.send(JSON.stringify({
-            // id : buffer.id,
             phase : 'handshake',
             first : true
         }));
         socket.send(JSON.stringify({
-            // id : socket.id,
             phase : 'handshake',
             first : false
         }));
