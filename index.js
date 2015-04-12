@@ -1,7 +1,7 @@
 var server = require('http').createServer();
 var WebSocket = require('ws');
 var WebSocketServer = WebSocket.Server,
-        wss = new WebSocketServer({port : 80});
+        wss = new WebSocketServer({port : 5000});
 
 var buffer = null;
 var list = []; 
