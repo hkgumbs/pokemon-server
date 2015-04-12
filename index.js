@@ -10,24 +10,31 @@ wss.on('connection', function(socket) {
         buffer = socket;
         console.log("waiting");
     } else {
-        table[buffer.id] = socket;
-        table[socket.id] = buffer;
+        // console.log(buffer);
+        // console.log('---');
+        // console.log(socket);
+        // table[buffer] = socket;
+        // table[socket] = buffer;
+        console.log(table);
+        console.log(Object.keys(table).length);
 
         // translate messages to your opponent
-        var onmessage = function(data) {
-            table[this.id].send(data);
-        }
-        buffer.on('message', onmessage);
-        socket.on('message', onmessage);
+        buffer.on('message', function(data) {
+            // console.log(data);
+            socket.send(data);
+        });
+        socket.on('message', function(data) {
+            // console.log(data);
+            buffer.send(data);
+        });
 
         // close connections on exit
         var onclose = function(data) {
             try {
-                table[this.id].close();
+                table[this].close();
             } catch (err) {}
-            try {
-                delete table[this.id];
-            } catch (err) {}
+            buffer = null;
+            socket = null;
         }
         buffer.on('close', onclose);
         socket.on('close', onclose);
@@ -43,7 +50,7 @@ wss.on('connection', function(socket) {
         }));
 
         console.log('connected');
-        buffer = null;
+        // buffer = null;
     }
 
     // Test app
